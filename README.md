@@ -1,44 +1,74 @@
-# Cellular Automaton Explorer
+# Emergence Explorer
 
-A Python-based exploration of cellular automata - simple computational rules that create complex emergent behaviors.
+A personal playground exploring how simple rules create complex patterns through iteration.
 
-## What is this?
+## Projects
 
-This project implements various types of cellular automata:
+### 1. Cellular Automaton Explorer
+**[cellular_automata.py](./cellular_automata.py)** | **[Documentation](./PATTERNS.md)**
+
+Exploration of cellular automata - simple computational rules that create complex emergent behaviors.
+
 - **Elementary Cellular Automata**: 1D automata following Wolfram's 256 rules
 - **Conway's Game of Life**: The classic 2D automaton
-- **Custom Rules**: Experiment with your own rule sets
+- **Notable patterns**: Rule 110 (Turing complete), Rule 30 (chaos), gliders, oscillators
 
-## Why?
+### 2. L-System Explorer
+**[lsystem.py](./lsystem.py)** | **[Documentation](./LSYSTEMS.md)**
 
-I'm fascinated by how simple, deterministic rules can create incredibly complex, organic-looking patterns. This is an exploration of emergence, complexity, and the boundary between order and chaos.
+Exploration of Lindenmayer systems - where grammar becomes geometry.
 
-## Features
+- **Classic fractals**: Koch curve, Sierpiński triangle, Dragon curve
+- **Organic structures**: Branching plants, binary trees
+- **Space-filling curves**: Hilbert curve
+- **SVG rendering**: High-quality vector output
 
-- Terminal-based visualization
-- Multiple CA types and rule sets
-- Interactive controls
-- Pattern saving and loading
-- Interesting preset patterns
+## The Pattern
 
-## Usage
+Both projects explore the same fundamental principle:
 
+**Complex behavior emerges from simple rules applied iteratively.**
+
+Cellular automata show this in spatial evolution. L-Systems show it in symbolic transformation. Different mechanisms, same profound pattern.
+
+## Quick Start
+
+**Cellular Automata:**
 ```bash
-# Run elementary CA (1D)
-python cellular_automata.py --type elementary --rule 110
-
-# Run Game of Life
+# Conway's Game of Life with a glider
 python cellular_automata.py --type life --pattern glider
 
-# Interactive mode
-python cellular_automata.py --interactive
+# Turing-complete Rule 110
+python cellular_automata.py --type elementary --rule 110
+
+# Explore interesting rules
+python cellular_automata.py --type explore
 ```
 
-## Notable Patterns
+**L-Systems:**
+```bash
+# Generate a Koch snowflake
+python lsystem.py koch --iterations 4
 
-- **Rule 110**: Turing complete elementary CA
-- **Rule 30**: Chaotic, used in random number generation
-- **Game of Life**: Gliders, spaceships, oscillators, and more
+# Grow a branching plant
+python lsystem.py plant --iterations 5
+
+# Create a dragon curve
+python lsystem.py dragon --iterations 10
+
+# List all available systems
+python lsystem.py --list
+```
+
+## Why This Matters
+
+These aren't just pretty patterns. They represent something profound:
+
+**Computational irreducibility** - You can't predict the outcome by looking at the rules. You have to run the system.
+
+**Emergence** - Complex global behavior from simple local rules. No blueprint, no central control.
+
+**Nature's algorithm** - How plants grow, how patterns form, how complexity arises from simplicity.
 
 ---
 
