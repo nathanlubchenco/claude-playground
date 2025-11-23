@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Flow Field - Where Chaos Becomes Art</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+        }
+        body {
+            background: #0a0a0a;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            font-family: 'Courier New', monospace;
+        }
+        canvas {
+            display: block;
+            cursor: crosshair;
+        }
+        #info {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 14px;
+            text-shadow: 0 0 10px rgba(0, 0, 0, 0.8);
+            pointer-events: none;
+            z-index: 10;
+        }
+        #controls {
+            position: absolute;
+            bottom: 20px;
+            left: 20px;
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 12px;
+            text-shadow: 0 0 10px rgba(0, 0, 0, 0.8);
+            pointer-events: none;
+        }
+    </style>
+</head>
+<body>
+    <div id="info">
+        <div>FLOW FIELD</div>
+        <div style="font-size: 10px; margin-top: 5px;">Where mathematics dances</div>
+    </div>
+    <div id="controls">
+        <div>CLICK: New field pattern</div>
+        <div>SPACE: Toggle trails</div>
+        <div>R: Reset particles</div>
+    </div>
+    <canvas id="canvas"></canvas>
+
+    <script>
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+
+        // Perlin noise implementation
+        class PerlinNoise {
+            constructor() {
+                this.gradients = {};
+                this.memory = {};
+            }
+
+            rand_vect() {
+                let theta = Math.random() * 2 * Math.PI;
+                return { x: Math.cos(theta), y: Math.sin(theta) };
+            }
+
+            dot_prod_grid(x, y, vx, vy) {
+                let g_vect;
+                let d_vect = { x: x - vx, y: y - vy };
+                let grid_key = `${vx},${vy}`;
+
+                if (this.gradients[grid_key]) {
+                    g_vect = this.gradients[grid_key];
+                } else {
+                    g_vect = this.rand_vect();
+                    this.gradients[grid_key] = g_vect;
+                }
+
+                return d_vect.x * g_vect.x + d_vect.y * g_vect.y;
+            }
+
+            smootherstep(x) {
+                return 6 * x ** 5 - 15 * x ** 4 + 10 * x ** 3;
+            }
+
+            interp(x, a, b) {
+                return a + this.smootherstep(x) * (b - a);
+            }
+
+            get(x, y) {
+                let mem_key = `${x},${y}`;
+                if (this.memory[mem_key]) {
+                    return this.memory[mem_key];
+                }
+
+                let xf = Math.floor(x);
+                let yf = Math.floor(y);
+
+                let tl = this.dot_prod_grid(x, y, xf, yf);
+                let tr = this.dot_prod_grid(x, y, xf + 1, yf);
+                let bl = this.dot_prod_grid(x, y, xf, yf + 1);
+                let br = this.dot_prod_grid(x, y, xf + 1, yf + 1);
+
+                let xt = this.interp(x - xf, tl, tr);
+                let xb = this.interp(x - xf, bl, br);
+                let v = this.interp(y - yf, xt, xb);
+
+                this.memory[mem_key] = v;
+                return v;
+            }
+        }
+
+        class Particle {
+            constructor() {
+                this.reset();
+            }
+
+            reset() {
+                this.x = Math.random() * canvas.width;
+                this.y = Math.random() * canvas.height;
+                this.vx = 0;
+                this.vy = 0;
+                this.life = Math.random() * 100 + 100;
+                this.maxLife = this.life;
+                this.hue = Math.random() * 60 + 180; // Blue-cyan range
+            }
+
+            update(flowField, time) {
+                // Get flow field angle at particle position
+                let scale = 0.003;
+                let noiseValue = flowField.get(
+                    this.x * scale + time * 0.0001,
+                    this.y * scale + time * 0.0001
+                );
+
+                let angle = noiseValue * Math.PI * 4;
+
+                // Apply force
+                let force = 0.3;
+                this.vx += Math.cos(angle) * force;
+                this.vy += Math.sin(angle) * force;
+
+                // Add slight turbulence
+                this.vx += (Math.random() - 0.5) * 0.1;
+                this.vy += (Math.random() - 0.5) * 0.1;
+
+                // Damping
+                this.vx *= 0.95;
+                this.vy *= 0.95;
+
+                // Update position
+                this.x += this.vx;
+                this.y += this.vy;
+
+                // Wrap around edges
+                if (this.x < 0) this.x = canvas.width;
+                if (this.x > canvas.width) this.x = 0;
+                if (this.y < 0) this.y = canvas.height;
+                if (this.y > canvas.height) this.y = 0;
+
+                // Age
+                this.life--;
+                if (this.life <= 0) {
+                    this.reset();
+                }
+            }
+
+            draw(ctx) {
+                let alpha = this.life / this.maxLife;
+                let speed = Math.sqrt(this.vx * this.vx + this.vy * this.vy);
+                let size = Math.min(speed * 0.5, 3);
+
+                // Color based on speed and position
+                let hue = this.hue + speed * 10;
+                let saturation = 70 + speed * 5;
+                let lightness = 50 + speed * 3;
+
+                ctx.fillStyle = `hsla(${hue}, ${saturation}%, ${lightness}%, ${alpha * 0.8})`;
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, size, 0, Math.PI * 2);
+                ctx.fill();
+            }
+        }
+
+        // Initialize
+        let flowField = new PerlinNoise();
+        let particles = [];
+        let numParticles = 3000;
+        let time = 0;
+        let showTrails = true;
+
+        for (let i = 0; i < numParticles; i++) {
+            particles.push(new Particle());
+        }
+
+        // Animation loop
+        function animate() {
+            // Create trails effect or clear
+            if (showTrails) {
+                ctx.fillStyle = 'rgba(10, 10, 10, 0.05)';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+            } else {
+                ctx.fillStyle = 'rgba(10, 10, 10, 0.2)';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+            }
+
+            // Update and draw particles
+            particles.forEach(particle => {
+                particle.update(flowField, time);
+                particle.draw(ctx);
+            });
+
+            time++;
+            requestAnimationFrame(animate);
+        }
+
+        // Event listeners
+        canvas.addEventListener('click', () => {
+            flowField = new PerlinNoise();
+        });
+
+        document.addEventListener('keydown', (e) => {
+            if (e.code === 'Space') {
+                e.preventDefault();
+                showTrails = !showTrails;
+            } else if (e.code === 'KeyR') {
+                particles.forEach(p => p.reset());
+            }
+        });
+
+        window.addEventListener('resize', () => {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        });
+
+        // Start animation
+        ctx.fillStyle = '#0a0a0a';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        animate();
+    </script>
+</body>
+</html>

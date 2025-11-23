@@ -23,13 +23,25 @@ Exploration of Lindenmayer systems - where grammar becomes geometry.
 - **Space-filling curves**: Hilbert curve
 - **SVG rendering**: High-quality vector output
 
+### 3. Particle Flow Field
+**[flow_field.html](./flow_field.html)**
+
+Mesmerizing visualization of 3000 particles flowing through a dynamic Perlin noise vector field.
+
+- **Real-time generation**: Perlin noise-based flow field
+- **Physics simulation**: Velocity-based particle movement
+- **Dynamic aesthetics**: Color and size respond to particle speed
+- **Interactive controls**: Click for new patterns, toggle trails, reset particles
+
+Open `flow_field.html` in a browser and watch mathematics dance.
+
 ## The Pattern
 
-Both projects explore the same fundamental principle:
+These projects explore the same fundamental principle:
 
 **Complex behavior emerges from simple rules applied iteratively.**
 
-Cellular automata show this in spatial evolution. L-Systems show it in symbolic transformation. Different mechanisms, same profound pattern.
+Cellular automata show this in spatial evolution. L-Systems show it in symbolic transformation. Flow fields demonstrate it through continuous dynamics. Different mechanisms, same profound pattern.
 
 ## Quick Start
 
